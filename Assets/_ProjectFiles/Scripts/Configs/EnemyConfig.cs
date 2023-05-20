@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Configs
 {
     [Serializable]
-    public class BaseParams
+    public struct BaseParams
     {
         public float heath;
         public float moveSpeed;
