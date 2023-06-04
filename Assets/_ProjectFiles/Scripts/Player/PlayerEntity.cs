@@ -38,7 +38,7 @@ namespace Player
 
         private async void FindEnemy()
         {
-            while (true)
+            while (Application.isPlaying)
             {
                 await Task.Delay(500);
                 _enemyEntityCached = GetNearestEnemy();
@@ -46,6 +46,7 @@ namespace Player
                 if (_enemyEntityCached is null)
                 {
                     animator.Play(Idle);
+                    Debug.Log("Enemy not found");
                     continue;
                 }
 
@@ -96,7 +97,7 @@ namespace Player
             _coloredGizmos = true;
             Collider[] allNearest = new Collider[1];
             // var counted = Physics.OverlapSphereNonAlloc(startCastPoint.position, castRadius, allNearest, layerMask);
-            var counted =Physics.OverlapBoxNonAlloc(startCastPoint.position, size, allNearest, Quaternion.identity, layerMask);
+            var counted = Physics.OverlapBoxNonAlloc(startCastPoint.position, size, allNearest, Quaternion.identity, layerMask);
 
             if (counted > 0)
             {
@@ -132,8 +133,8 @@ namespace Player
         private void OnDrawGizmos()
         {
             Gizmos.color = _coloredGizmos ?  Color.cyan : debugColor;
-            Gizmos.DrawSphere(startCastPoint.position, castRadius);
-            Gizmos.DrawWireCube(startCastPoint.position, size);
+            // Gizmos.DrawSphere(startCastPoint.position, castRadius);
+            Gizmos.DrawCube(startCastPoint.position, size);
         }
 #endif 
         
