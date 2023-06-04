@@ -11,7 +11,7 @@ namespace Player
     public class PlayerEntity : MonoBehaviour, IDamaged
     {
         [SerializeField] private Transform startCastPoint;
-        [SerializeField] private byte castRadius;
+        [SerializeField] private float castRadius;
         [SerializeField] private LayerMask layerMask;
         [SerializeField] private Color32 debugColor;
         [SerializeField] private NavMeshAgent navMeshAgent;
@@ -36,19 +36,24 @@ namespace Player
             FindEnemy();
         }
 
-        private void FindEnemy()
+        private async void FindEnemy()
         {
-            _enemyEntityCached = GetNearestEnemy();
-
-            if (_enemyEntityCached is null)
+            while (true)
             {
-                animator.Play(Idle);
-                return;
+                await Task.Delay(500);
+                _enemyEntityCached = GetNearestEnemy();
+
+                if (_enemyEntityCached is null)
+                {
+                    animator.Play(Idle);
+                    continue;
+                }
+
+                _enemyEntityCached.onDeath += EnemyDeath;
+                transform.LookAt(_enemyEntityCached.transform);
+                MoveToPoint(_enemyEntityCached.gameObject.transform);
+                break;
             }
-            
-            _enemyEntityCached.onDeath += EnemyDeath;
-            transform.LookAt(_enemyEntityCached.transform);
-            MoveToPoint(_enemyEntityCached.gameObject.transform);
         }
 
         private async void MoveToPoint(Transform target)
@@ -90,7 +95,8 @@ namespace Player
         {
             _coloredGizmos = true;
             Collider[] allNearest = new Collider[1];
-            var counted = Physics.OverlapSphereNonAlloc(startCastPoint.position, castRadius, allNearest, layerMask);
+            // var counted = Physics.OverlapSphereNonAlloc(startCastPoint.position, castRadius, allNearest, layerMask);
+            var counted =Physics.OverlapBoxNonAlloc(startCastPoint.position, size, allNearest, Quaternion.identity, layerMask);
 
             if (counted > 0)
             {
@@ -122,10 +128,12 @@ namespace Player
         }
         
 #if UNITY_EDITOR
+        [SerializeField] private Vector3 size;
         private void OnDrawGizmos()
         {
             Gizmos.color = _coloredGizmos ?  Color.cyan : debugColor;
             Gizmos.DrawSphere(startCastPoint.position, castRadius);
+            Gizmos.DrawWireCube(startCastPoint.position, size);
         }
 #endif 
         
